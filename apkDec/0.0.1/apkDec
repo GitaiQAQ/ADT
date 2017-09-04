@@ -1,0 +1,55 @@
+path_apk="$1"
+
+basepath=$(cd `dirname $0`; pwd)
+
+path_dir=$(cd `dirname "$1"`; pwd)
+path_apktool=$basepath"/ad_libs/apktool.jar"
+path_dex2jar=$basepath"/ad_libs/dex2jar.sh"
+path_cfr=$basepath"/ad_libs/cfr_0_110.jar"
+path_jd=$basepath"/ad_libs/jd-cli.jar"
+path_aapt=$basepath"/ad_libs/aaptx64"
+
+if [ x"$2" = x ];
+then
+	unzip $path_apk -d $path_dir/tmp  > /dev/null 2>&1
+	mv $path_dir/tmp/classes.dex $path_dir
+	rm -rf $path_dir/tmp
+	bash $path_dex2jar $path_dir/classes.dex
+	# java -jar $path_jd $path_dir/classes_dex2jar.jar -g "ERROR" -oz $path_dir/src.zip
+	java -jar $path_cfr $path_dir/classes_dex2jar.jar --outputdir $path_dir/src
+	unzip $path_dir/src.zip -d $path_dir/src  > /dev/null 2>&1
+	java -jar $path_apktool d $path_apk -o $path_dir/tmp
+	mv $path_dir/tmp/* $path_dir
+	rm -rf $path_dir/tmp
+fi
+
+$path_aapt d badging $path_apk > $path_dir"/badging.md";
+badging=`cat $path_dir"/badging.md"`
+
+for line in $badging;do
+    apkinfo=$apkinfo$line"\n\r";
+done
+
+icons=`echo -e $apkinfo | grep -E 'res.*.png' -o -m 1`
+
+echo -e "![icon](./${icons/-v4/})
+
+### Location
+Apk: \`$path_apk\`    
+Data: "`date '+%Y-%m-%d %H:%M:%S'` "    
+Builder: "`whoami`"    
+LSB: "`lsb_release -d` `lsb_release -r`"    
+
+### apkDec     
+A tool for decompile Android apk files    
+Version:  \`v1.0.0-α\`     
+Dependencies:    
++ Apktool \`v2.0.0-RC2\`    
++ dex2jar \`translator-0.0.9.15\`    
++ jd-cli \`0.9.1.Final\`    
+
+### Apk Info    
+\`\`\`"  > $path_dir"/apkDec.md"    
+
+cat $path_dir"/apkDec.md" $path_dir"/badging.md" > $path_dir"/README.md"
+echo "\`\`\`" >> $path_dir"/README.md"

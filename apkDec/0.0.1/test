@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ $# -lt 1 ] 
+    then 
+    date 
+else 
+    while getopts m:dyDHMSTJjwahr OPTION 
+    do 
+        case $OPTION in 
+        m)echo $OPTARG;; 
+        d)date '+%d';; 
+        y)date '+%y';; 
+        D)date '+%D';; 
+        H)date '+%H';; 
+        M)date '+%M';; 
+        S)date '+%S';; 
+        T)date '+%T';; 
+        j)date '+%j';; 
+        J)date '+%y%j';; 
+        w)date '+%w';; 
+        a)date '+%a';; 
+        h)date '+%h';; 
+        r)date '+%r';; 
+        \?)echo "无效的选项!$OPTION";; 
+        esac 
+    done 
+fi 
